@@ -1367,10 +1367,14 @@ function createBot() {
   }
 }
 
+
 function scheduleReconnect() {
+  // Jangan reconnect jika bot sudah dihentikan
+  if (!botRunning) return;
+
   clearBotTimeouts();
 
-  // FIX: don't stack reconnect if already waiting
+  // Jangan menjadwalkan reconnect ganda
   if (isReconnecting) {
     addLog("[Bot] Reconnect already scheduled, skipping duplicate.");
     return;
@@ -1380,6 +1384,7 @@ function scheduleReconnect() {
   botState.reconnectAttempts++;
 
   const delay = getReconnectDelay();
+
   addLog(
     `[Bot] Reconnecting in ${delay / 1000}s (attempt #${botState.reconnectAttempts})`,
   );
@@ -1387,9 +1392,14 @@ function scheduleReconnect() {
   reconnectTimeoutId = setTimeout(() => {
     reconnectTimeoutId = null;
     isReconnecting = false;
+
+    // Periksa kembali status sebelum membuat koneksi
+    if (!botRunning) return;
+
     createBot();
   }, delay);
 }
+
 
 // ============================================================
 // MODULE INITIALIZATION
